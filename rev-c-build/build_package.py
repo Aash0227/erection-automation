@@ -39,7 +39,7 @@ def new(title,subtitle,code):
     text(p,(2020,99,2520,151),'ERECTION COORDINATION CONCEPT',18,True,RED,2)
     line(p,(62,180),(2530,180),NAVY,2)
     line(p,(62,1655),(2530,1655),GREY,1)
-    text(p,(64,1671,2110,1713),'REV B  |  29 SEP 2026  |  NOT FOR ERECTION - engineering and lift-plan release required  |  Overlays NTS; do not scale',16,False,GREY)
+    text(p,(64,1671,2110,1713),'REV C | 29 SEP 2026 | NOT FOR ERECTION - engineering and lift-plan release required | Overlays NTS; do not scale',16,False,GREY)
     text(p,(2190,1669,2528,1714),f'{code}  /  {len(doc):02d}',20,True,align=2)
     return p
 def embed(p,n,r,crop=None,source=src):
@@ -148,7 +148,7 @@ para(p,1730,520,790,'Last groups - CONFIRMED','26 is repeated on three local seg
 para(p,1730,785,790,'Underlying logic - PROBABLE','Use a stable perimeter start; resolve returns and crosswalls before adjacent closures; work in local clusters; finish restricted entry/service areas after larger groups. Connection-face access may explain several turns. These reasons are inferred, not written on the reference.',23,275)
 para(p,1730,1090,790,'Not established by the reference','No C/T/S symbols, crane setup, relocation schedule, packing manifest, bracing design or step-by-step access validation is shown. Do not claim those items were reverse-engineered as facts.',23,210)
 text(p,(80,1472,2500,1570),'LIVIO ERECTION SEQUENCE LOGIC: group by constructible wall runs, show direction, place trapped pieces before closures, preserve connection and future delivery access, and test the changed condition after each group. Add a stability/diaphragm cycle for this multistory project.',26,True)
-text(p,(80,1580,2500,1630),'Improved here: unique numbers, clean source crops, distinct access/material styles, documented assumptions, explicit closure and crane-move checks.',21)
+text(p,(80,1580,2500,1630),'Improved here: unique numbers, clean source crops, distinct access/material styles, documented assumptions, explicit closure and crane-move checks, plan-based wall-run erection arrows.',21)
 
 # 03 site
 p=new('Site logistics | Jordan Avenue crane candidates','Authority: civil C2.0 p75 + A1.0 p15, ER-1 p90, landscape L1.01 p98, joint trench p215  |  Symbols indicate candidate zones, not equipment footprints','EC-03')
@@ -227,7 +227,7 @@ zone_rects=[(.06,.640,.40,.895),(.40,.640,.72,.895),(.40,.340,.635,.602),(.06,.3
 badge_pts=[(.225,.937),(.525,.937),(.51,.286),(.22,.286),(.80,.937),(.80,.286)]
 for l,pn in enumerate(level_pages,1):
     base=5+(l-1)*8; rrrows=rows[base-1:base+7]
-    p=new(f'Level {l} | Steps {base:02}-{base+7:02}',f'Actual architectural plan A1.{l}, permit p{pn}  |  Rear/middle sector first, then El Camino frontage  |  Proposed groups; shop-panel mapping required',f'EC-{5+l:02}')
+    p=new(f'Level {l} | Steps {base:02}-{base+7:02}',f'Actual architectural plan A1.{l}, permit p{pn}  |  Rear/middle sector first, then El Camino frontage  |  Red arrows = schematic wall-band erection runs; shop-panel mapping required',f'EC-{5+l:02}')
     xy,ar=embed(p,pn,(65,320,1935,1430),(.02,.23,.932,.970))
     # Equipment chain is outside the drawing, linked to the street-side orientation.
     tag(p,100,218,'T',TEAL,75);tag(p,290,218,'S',TEAL,75);tag(p,510,218,'C A',PURPLE,125);tag(p,1500,218,'C B?',PURPLE,140)
@@ -240,12 +240,22 @@ for l,pn in enumerate(level_pages,1):
         a=xy(zr[0],zr[1]);b=xy(zr[2],zr[3]);box(p,(*a,*b),color=RED,width=2,dashes='[9 6]')
         bx,by=xy(*bp);badge(p,bx,by,f'{base+j:02}')
         if j in [3,5]: text(p,(bx+34,by-21,bx+82,by+35),'!',28,True,AMBER)
-        cy=zr[1] if j in [2,3,5] else zr[3]
-        line(p,(bx,by+(28 if j in [2,3,5] else -28)),xy(bp[0],cy),RED,2)
-        # Short arrows trace exterior-edge progress without running through room notes.
-        xx1,xx2=zr[0]+.015,zr[2]-.015
-        yy=zr[3]+.006 if j in [0,1,4] else zr[1]-.006
-        arrow(p,[xy(xx2,yy),xy(xx1,yy)] if j in [2,3] else [xy(xx1,yy),xy(xx2,yy)],RED,3)
+        # Rev C wall-band erection runs: red arrows trace each group's actual
+        # wall alignments on the plan - the exterior wall band erected in the
+        # sequence direction plus the closing return toward the corridor -
+        # with an arrowhead on every segment, in the reference.pdf style.
+        # Leader ties the step badge to the run start.
+        runs=[
+            [(.068,.901),(.392,.901),(.392,hv+.055)],  # 01 rear ext wall L>R + return up
+            [(.408,.901),(.712,.901),(.712,hv+.055)],  # 02 continue rear ext wall L>R
+            [(.628,.334),(.408,.334)],                 # 03 Jordan ext wall R<L
+            [(.392,.334),(.075,.334),(.075,hv-.055)],  # 04 continue R<L + close rear return
+            [(.728,.901),(.876,.901),(.876,hv+.055)],  # 05 front ext wall L>R + return up
+            [(.642,.314),(.876,.314),(.876,hv-.055)],  # 06 near-front wall L>R + core closure
+        ][j]
+        st=xy(*runs[0])
+        line(p,(bx,by+(28 if by<st[1] else -28)),st,RED,2)
+        for s,e in zip(runs,runs[1:]): arrow(p,[xy(*s),xy(*e)],RED,4)
     # Global transitions are explicit in the uncluttered flow strip below.
     arrow(p,[xy(.325,hv+.007),xy(.755,hv+.007)],BLUE,3,'[12 8]')
     text(p,(80,1436,1910,1473),'BLUE: preserve central corridor / stair routes for people and small items. Follow actual plan jogs. Group outlines are schematic; include all associated recesses and returns.',18,False,BLUE)
@@ -254,7 +264,7 @@ for l,pn in enumerate(level_pages,1):
         labels=['FAR REAR','FAR MIDDLE','NEAR MIDDLE','NEAR REAR','FAR FRONT','NEAR FRONT','KIT CHECK','DECK RELEASE']
         text(p,(x-18,1554,x+179,1597),labels[j],17,True,align=1)
         if j<7:arrow(p,[(x+61,1520),(x+185,1520)],PURPLE if j==3 else RED,3)
-    text(p,(80,1604,1910,1643),'Transitions: far middle to near middle = change workface; near rear to far front = new sector / R if needed. Short plan arrows show local progression, not load-flight paths.',17)
+    text(p,(80,1604,1910,1643),'Transitions: far middle to near middle = change workface; near rear to far front = new sector / R if needed. Red wall-band runs show erection direction, not load-flight paths.',17)
     for j,row in enumerate(rrrows):
         yy=225+j*135
         badge(p,2020,yy+18,row['step'],r=22)
@@ -344,7 +354,7 @@ for i,(rid,topic,owner,body) in enumerate(holds):
 p=new('Evidence register | Scope, confidence and source limitations','Repository downloads verified against GitHub blob SHA-1 values  |  Page references are PDF page numbers, counted from 1','EC-18')
 para(p,85,235,1170,'CONFIRMED drawing evidence','Reference: one annotated Cupertino sheet. Target: 215-page permit compilation. Reviewed relevant architectural plans, elevations and sections; structural plans/connection details; civil access/utilities; landscape trees; shoring and parking/elevator interfaces. MEP/energy material was indexed and consulted selectively, not subjected to a full discipline design review.',24,270)
 para(p,1340,235,1170,'Confidence rules','CONFIRMED = directly visible in a supplied project document. PROBABLE = inference from the reference or converging evidence. ASSUMED = proposed sequencing, zoning or logistics. FIELD VERIFY = unresolved information requiring an accountable field, design or vendor decision. All 74 proposed steps are ASSUMED; holds remain open.',24,270)
-para(p,85,560,1170,'Source precedence','Use permit dimensions and released coordinated drawings. Imagery supports adjacency and access awareness only. Rev B adds an independent Esri World Imagery cross-check (EC-03A) retrieved 29 SEP 2026; its capture date is not verified, so the supplied annotated aerial (EC-01) remains the closer-in-time site reference. Direct Google Earth access is unavailable to automation.',24,260)
+para(p,85,560,1170,'Source precedence','Use permit dimensions and released coordinated drawings. Imagery supports adjacency and access awareness only. Rev B added the EC-03A Esri World Imagery cross-check (capture date unverified; the EC-01 annotated aerial remains the closer-in-time reference). Rev C adds schematic wall-band erection arrows on every floor plan: red runs trace each group wall band in the sequence direction plus closing returns, pending the shop-panel map (RFI-03). Google Earth is unavailable to automation.',24,260)
 para(p,1340,560,1170,'Other discrepancies affecting coordination','A1.0 stair numbering is reversed relative to A1.1/upper floor plans; use the floor-plan positions until reconciled. T1.1 parking summary differs from later vendor schedules. A4.1 overall height and elevator-top level are different labels/datums; verify actual lifting elevation. These items are not silently corrected in the source.',24,260)
 text(p,(85,880,2490,942),'Key project sources',29,True)
 sources=[
@@ -390,9 +400,9 @@ for start in range(0,len(rows),8):
     text(p,(75,1602,2500,1643),'Source and status fields for every row, plus the full changed-state / next-step checks, are included in the companion CSV. A sequence group is not a single crane pick.',18)
 
 assert [int(r['step']) for r in rows]==list(range(1,75))
-doc.set_metadata({'title':'Livio 4898 El Camino Real Erection Coordination Rev B','author':'Prepared with Hermes Agent for Livio review','subject':'Conditional erection coordination concept; not for erection','keywords':'Livio, Aron Terrace, erection sequence, concept, 74 steps, aerial cross-check'})
+doc.set_metadata({'title':'Livio 4898 El Camino Real Erection Coordination Rev C','author':'Prepared with Hermes Agent for Livio review','subject':'Conditional erection coordination concept; not for erection','keywords':'Livio, Aron Terrace, erection sequence, concept, 74 steps, aerial cross-check, wall-band erection arrows'})
 doc.set_toc([[1,title,i+1] for i,(code,title) in enumerate(pages)])
-path=OUT/'Livio_4898_El_Camino_Erection_Coordination_RevB.pdf'
+path=OUT/'Livio_4898_El_Camino_Erection_Coordination_RevC.pdf'
 doc.save(path,garbage=4,deflate=True)
 with (OUT/'Livio_4898_El_Camino_Sequence_Register.csv').open('w',newline='',encoding='utf-8-sig') as f:
     cw=csv.DictWriter(f,fieldnames=list(rows[0]));cw.writeheader();cw.writerows(rows)
